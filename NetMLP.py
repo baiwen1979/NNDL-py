@@ -4,8 +4,6 @@
 import random
 # 第三方库
 import numpy as np
-# 消除pylint关于print语句的错误
-from __future__ import print_function
 
 # 类：NetMLP, 多层感知器的神经网络
 class NetMLP(object):
@@ -34,7 +32,7 @@ class NetMLP(object):
         return a
 
     # 随机梯度下降训练
-    def SDG(self, training_data, epochs, mini_batch_size, eta, test_data = None):
+    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data = None):
         """使用小批量随机梯度下降训练神经网络。其中训练数据参数training_data是一个二元组(x,y)的
         列表，表示训练数据的输入及其期望的输出；epochs表示训练周期数；mini_batch_size表示采样时
         所用小批量的大小；eta为学习速率；如果提供了可选的测试数据test_data，该程序将在每个训练周期
