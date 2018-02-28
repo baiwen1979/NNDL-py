@@ -66,10 +66,14 @@ class NetMLP(object):
         的列表，并且eta是学习速率"""
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
+        # 1: 输入训练样本集，由mini_batch参数提供
+        # 2: 对于每个训练样本x及其期望输出y
         for x, y in mini_batch:
+            # 调用反向传播算法函数与训练样本x相关的代价梯度值
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+        # 3: 梯度下降：更新权重和偏置向量
         self.weights = [w - (eta / len(mini_batch)) * nw 
                         for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b - (eta / len(mini_batch)) * nb 
@@ -81,25 +85,35 @@ class NetMLP(object):
         nabla_b和nabla_w是numpy数组的逐层列表"""
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        # 前向反馈
+
+        # 1. 输入(训练样本集)x: 设置输入层的激活值
         activation = x
         activations = [x] # 用来存储各层所有激活值的列表
         zs = [] # 用来存储各层z向量的列表
+
+        # 2. 前向反馈: 对于每一层,计算相应的z向量和激活向量a
         for b, w in zip(self.biases, self.weights):
-            z = np.dot(w, activation)+b
+            z = np.dot(w, activation) + b
             zs.append(z)
             activation = sigmoid(z)
             activations.append(activation)
-        # 向后传递梯度值
+        
+        
+        # 3. 输出误差: 使用BP1方程计算输出（L层）误差向量
         delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+        # 4. 反向传播误差: 对于从后往前的每一层L - 1, L - 2, ... 2 依次计算各层的误差向量误差
         for l in xrange(2, self.num_layers):
+            # BP2
             z = zs[-l]
             sp = sigmoid_prime(z)
             delta = np.dot(self.weights[-l + 1].transpose(), delta) * sp
+            # BP3
             nabla_b[-l] = delta
+            # BP4  
             nabla_w[-l] = np.dot(delta, activations[-l - 1].transpose())
+        # 5. 输出: 成本函数关于偏置b和权重w的梯度
         return (nabla_b, nabla_w)
 
     # 网络评估函数，并返回神经网络输出正确结果的测试次数
@@ -110,15 +124,16 @@ class NetMLP(object):
                         for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in test_results)
     
-    # 计算价值函数的导数
+    # 计算成本函数关于输出激活值的偏导数向量
     def cost_derivative(self, output_activations, y):
         """返回用来作为输出层激活值的偏导数向量"""
         return (output_activations - y)
     
 
-# 辅助函数：Sigmoid函数
+# 辅助函数：Sigmoid激活函数
 def sigmoid(z):
-    """参数z是一个向量或Numpy数组
+    """sigmoid激活函数。计算某层神经元的加权输入向量z的激活值。其中参数z是一个
+    向量或Numpy数组
     """
     return 1.0 / (1.0 + np.exp(-z))
 
