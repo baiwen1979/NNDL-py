@@ -31,7 +31,7 @@ class NetMLP(object):
             a = sigmoid(np.dot(w, a) + b)
         return a
 
-    # 随机梯度下降训练
+    # 随机梯度下降(Stochastic Gradient Descent)训练
     def SGD(self, training_data, epochs, mini_batch_size, eta, test_data = None):
         """使用小批量随机梯度下降训练神经网络。其中训练数据参数training_data是一个二元组(x,y)的
         列表，表示训练数据的输入及其期望的输出；epochs表示训练周期数；mini_batch_size表示采样时
@@ -83,20 +83,16 @@ class NetMLP(object):
         nabla_b和nabla_w是numpy数组的逐层列表"""
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-
         # 1. 输入(训练样本集)x: 设置输入层的激活值
         activation = x
         activations = [x] # 用来存储各层所有激活值的列表
         zs = [] # 用来存储各层z向量的列表
-
         # 2. 前向反馈: 对于每一层,计算相应的z向量和激活向量a
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation) + b
             zs.append(z)
             activation = sigmoid(z)
-            activations.append(activation)
-        
-        
+            activations.append(activation)                
         # 3. 输出误差: 使用BP1方程计算输出（L层）误差向量
         delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
         nabla_b[-1] = delta
